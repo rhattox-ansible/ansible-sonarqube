@@ -10,14 +10,17 @@
     sonarqube_systemd_service_name: sonarqube
 
   tasks:
-    - name: get the username running the deploy
-      become: false
-      shell: "/bin/bash -c 'whoami'"
-      register: host_username
+    - name: Retrieve system environment
+      block:
+        - name: Get the username running the deploy
+          become: false
+          register: host_username
+          changed_when: host_username.rc != 0
+          ansible.builtin.command: whoami
 
-    - name: Display Command Output
-      debug:
-        var: host_username.stdout
+        - name: Display Command Output
+          ansible.builtin.debug:
+            var: host_username.stdout
 
     - name: Create sonarqube home directory
       ansible.builtin.file:
@@ -31,14 +34,15 @@
       ansible.builtin.get_url:
         url: "{{ sonarqube_url }}"
         dest: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
+        mode: "0777"
 
     - name: Extract sonarqube distribution
       ansible.builtin.unarchive:
         src: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
         dest: "{{ sonarqube_home }}"
-        remote_src: yes
+        remote_src: true
 
-    - name: Download sonarqube distribution
+    - name: Create sonarqube home directory
       ansible.builtin.file:
         path: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
         state: absent
@@ -70,10 +74,10 @@
 
     - name: Reload Systemd to recognize the new service
       ansible.builtin.systemd:
-        daemon_reload: yes
+        daemon_reload: true
 
     - name: Enable and start Nexus service
       ansible.builtin.service:
         name: "{{ sonarqube_systemd_service_name }}"
-        enabled: yes
+        enabled: true
         state: started
