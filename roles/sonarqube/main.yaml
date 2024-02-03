@@ -1,0 +1,92 @@
+---
+- name: Install Sonatype sonarqube Repository Manager
+  hosts: localhost
+  become: true
+
+  vars:
+    sonarqube_version: "10.3.0.82913"
+    sonarqube_home: "/opt/sonarqube"
+    sonarqube_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip"
+    sonarqube_systemd_service_name: sonarqube
+
+  tasks:
+    - name: Retrieve system environment
+      block:
+        - name: Get the username running the deploy
+          become: false
+          register: host_username
+          changed_when: host_username.rc != 0
+          ansible.builtin.command: whoami
+
+        - name: Display Command Output
+          ansible.builtin.debug:
+            var: host_username.stdout
+
+    - name: Create sonarqube home directory
+      ansible.builtin.file:
+        path: "{{ sonarqube_home }}"
+        state: directory
+        owner: "{{ host_username.stdout }}"
+        group: "{{ host_username.stdout }}"
+        mode: "0755"
+
+    - name: Download sonarqube distribution
+      ansible.builtin.get_url:
+        url: "{{ sonarqube_url }}"
+        dest: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
+        mode: "0777"
+
+    - name: Extract sonarqube distribution
+      ansible.builtin.unarchive:
+        src: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
+        dest: "{{ sonarqube_home }}"
+        remote_src: true
+
+    - name: Create sonarqube home directory
+      ansible.builtin.file:
+        path: "/tmp/sonarqube-{{ sonarqube_version }}.zip"
+        state: absent
+
+    - name: Configure sonarqube as a Systemd service
+      ansible.builtin.copy:
+        content: |
+          [Unit]
+          Description=SonarQube service
+          After=network.target
+
+          [Service]
+          Type=forking
+          LimitNOFILE=65536
+          User={{ host_username.stdout }}
+          Group={{ host_username.stdout }}
+          ExecStart={{ sonarqube_home }}/sonarqube-{{ sonarqube_version }}/bin/linux-x86-64/sonar.sh start
+          ExecStop={{ sonarqube_home }}/sonarqube-{{ sonarqube_version }}/bin/linux-x86-64/sonar.sh stop
+          Restart=on-abort
+          TimeoutSec=600
+
+          [Install]
+          WantedBy=multi-user.target
+
+        dest: "/etc/systemd/system/{{ sonarqube_systemd_service_name }}.service"
+        owner: "{{ host_username.stdout }}"
+        group: "{{ host_username.stdout }}"
+        mode: "0644"
+
+    - name: Reload Systemd to recognize the new service
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    # - name: Enable and start Nexus service
+    #   ansible.builtin.service:
+    #     name: "{{ sonarqube_systemd_service_name }}"
+    #     enabled: true
+    #     state: started
+
+    - name: Update web context for sonarQ
+      ansible.builtin.copy:
+        content: |
+          sonar.web.context=/sonar
+        dest: "/opt/sonarqube/sonarqube-10.3.0.82913/conf/sonar.properties"
+        owner: "{{ host_username.stdout }}"
+        group: "{{ host_username.stdout }}"
+        mode: "0644"
