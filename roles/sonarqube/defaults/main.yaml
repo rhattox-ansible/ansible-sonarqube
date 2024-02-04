@@ -1,0 +1,7 @@
+sonar_version: "10.3.0.82913"
+sonar_home: "/var/lib/sonar"
+sonar_tmp_path: "/tmp/sonar"
+sonar_archive_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonar_version }}.zip"
+sonar_tmp_file: "/tmp/sonar.tar.gz"
+sonar_group: sonar
+sonar_user: sonar
