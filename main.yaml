@@ -8,5 +8,6 @@
     corretto_version: "17.0.10.7.1"
 
   roles:
+    - zip
     - java
     - sonarqube
