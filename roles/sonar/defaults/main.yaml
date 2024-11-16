@@ -1,0 +1,13 @@
+app_name: sonar
+app_version: "10.3.0.82913"
+app_home: "/var/lib/{{ app_name }}"
+app_tmp_path: "/tmp/{{ app_name }}"
+app_archive_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ app_version }}.zip"
+app_tmp_file: "/tmp/{{ app_name }}.tar.gz"
+
+corretto_home_path: "/usr/lib/jvm/corretto/"
+corretto_version: "17.0.13.11.1/"
+
+apt_packages: |
+  - zip
+  - unzip

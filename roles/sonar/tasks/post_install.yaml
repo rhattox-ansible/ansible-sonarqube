@@ -1,0 +1,9 @@
+- name: Reload Systemd to recognize the new service
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start the service
+  ansible.builtin.systemd:
+    name: "{{ app_name }}"
+    state: started
+    # enabled: true

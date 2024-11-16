@@ -2,12 +2,5 @@
   hosts: localhost
   become: true
   gather_facts: true
-
-  vars:
-    corretto_home_path: "/usr/lib/jvm/corretto"
-    corretto_version: "17.0.10.7.1"
-
   roles:
-    - zip
-    - java
-    - sonarqube
+    - sonar

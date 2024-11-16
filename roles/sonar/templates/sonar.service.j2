@@ -1,0 +1,19 @@
+[Unit]
+Description={{ app_name }} service
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User={{ app_name }}
+Group={{ app_name }}
+PermissionsStartOnly=true
+ExecStart=/bin/nohup {{ corretto_home_path }}/{{ corretto_version }}/bin/java -Xms32m -Xmx32m -Djava.net.preferIPv4Stack=true -jar {{ app_home }}/sonarqube-{{ app_version }}/lib/sonar-application-10.3.0.82913.jar
+StandardOutput=syslog
+LimitNOFILE=131072
+LimitNPROC=8192
+TimeoutStartSec=5
+Restart=always
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

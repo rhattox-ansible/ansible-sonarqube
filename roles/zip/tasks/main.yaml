@@ -1,6 +1,0 @@
-- name: Install required packages
-  ansible.builtin.apt:
-    name:
-      - zip
-      - unzip
-    state: present
