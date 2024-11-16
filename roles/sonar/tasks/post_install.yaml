@@ -1,3 +1,19 @@
+- name: Update web context for sonarQ
+  ansible.builtin.template:
+    src: "roles/{{ app_name }}/templates/{{ app_name }}.properties.j2"
+    dest: "{{ app_config_path }}"
+    owner: "{{ app_name }}"
+    group: "{{ app_name }}"
+    mode: "0550"
+
+- name: Generate SystemD Config
+  ansible.builtin.template:
+    src: roles/{{ app_name }}/templates/sonar.service.j2
+    dest: "{{ app_systemd_config_path }}"
+    group: "{{ app_name }}"
+    owner: "{{ app_name }}"
+    mode: "0550"
+
 - name: Reload Systemd to recognize the new service
   ansible.builtin.systemd:
     daemon_reload: true
@@ -7,3 +23,12 @@
     name: "{{ app_name }}"
     state: started
     # enabled: true
+
+- name: Configure Permissions
+  ansible.builtin.file:
+    path: "{{ app_home }}"
+    state: directory
+    recurse: true
+    owner: "{{ app_name }}"
+    group: "{{ app_name }}"
+    mode: "0750"

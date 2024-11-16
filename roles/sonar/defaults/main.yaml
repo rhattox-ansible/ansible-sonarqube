@@ -1,13 +1,26 @@
 app_name: sonar
 app_version: "10.3.0.82913"
+
 app_home: "/var/lib/{{ app_name }}"
 app_tmp_path: "/tmp/{{ app_name }}"
 app_archive_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ app_version }}.zip"
 app_tmp_file: "/tmp/{{ app_name }}.tar.gz"
 
-corretto_home_path: "/usr/lib/jvm/corretto/"
-corretto_version: "17.0.13.11.1/"
+binary_source_path: "{{ app_home }}/sonarqube-{{ app_version }}/bin/linux-x86-64/sonar.sh"
+binary_dest_path: "/usr/bin/{{ app_name }}"
+
+app_config_path: "{{ app_home }}/sonarqube-{{ app_version }}/conf/{{ app_name }}.properties"
+app_systemd_config_path: "/etc/systemd/system/{{ app_name }}.service"
+
+nginx_config_path: "/etc/nginx/sites-available/{{ app_name }}.conf"
 
 apt_packages: |
   - zip
   - unzip
+
+# templates/sonar.service.j2
+app_jar_path: "{{ app_home }}/sonarqube-{{ app_version }}/lib/sonar-application-{{ app_version }}.jar"
+# templates/sonar.service.j2
+corretto_home_path: "/usr/lib/jvm/corretto/"
+corretto_version: "17.0.13.11.1/"
+corretto_bin_path: "{{ corretto_home_path }}/{{ corretto_version }}/bin/java"
